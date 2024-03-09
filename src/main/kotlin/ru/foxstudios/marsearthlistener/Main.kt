@@ -17,7 +17,7 @@ fun main(args: Array<String>) {
                     val packet = incoming
                     val content = packet.content().toString(StandardCharsets.UTF_8)
                     println(content.toByteArray().size)
-                    val url = URI("http://127.0.0.1:30007/data/addschedule").toURL()
+                    val url = URI("http://mars-listener-service:25565/data/addschedule").toURL()
                     val con = url.openConnection() as HttpURLConnection
                     con.requestMethod = "POST"
                     con.doOutput = true
