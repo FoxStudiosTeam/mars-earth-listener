@@ -11,7 +11,9 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
 }
-
+kotlin {
+    jvmToolchain(21)
+}
 dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
@@ -42,7 +44,16 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
+    configurations["compileClasspath"].forEach { file: File ->
+        from(zipTree(file.absoluteFile))
+    }
+    exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
+}
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "21"
 }
