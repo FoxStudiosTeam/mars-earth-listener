@@ -20,32 +20,36 @@ fun main(args: Array<String>) {
                     val packet = incoming
                     val content = packet.content().toString(StandardCharsets.UTF_8)
                     println(content.toByteArray().size)
-                    val url = URI("http://localhost:30007/data/addschedule").toURL()
-                    val connection = url.openConnection() as HttpURLConnection
+                    try {
+                        val url = URI("http://localhost:30007/data/addschedule").toURL()
+                        val connection = url.openConnection() as HttpURLConnection
 
-                    connection.requestMethod = "POST"
-                    connection.setRequestProperty("Content-Type", "application/json")
-                    connection.doOutput = true
+                        connection.requestMethod = "POST"
+                        connection.setRequestProperty("Content-Type", "application/json")
+                        connection.doOutput = true
 
-                    val requestBody = content
+                        val requestBody = content
 
-                    val outputStream: OutputStream = connection.outputStream
-                    outputStream.write(requestBody.toByteArray())
-                    outputStream.flush()
+                        val outputStream: OutputStream = connection.outputStream
+                        outputStream.write(requestBody.toByteArray())
+                        outputStream.flush()
 
-                    val reader = BufferedReader(InputStreamReader(connection.inputStream))
-                    var line: String?
-                    val responsd = StringBuffer()
-                    while (reader.readLine().also { line = it } != null) {
-                        responsd.append(line)
+                        val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                        var line: String?
+                        val responsd = StringBuffer()
+                        while (reader.readLine().also { line = it } != null) {
+                            responsd.append(line)
+                        }
+                        reader.close()
+
+                        // Закрытие соединения
+                        connection.disconnect()
+
+                        // Вывод ответа
+                        println(responsd.toString())
+                    } catch (e: Exception) {
+                        println(e.message)
                     }
-                    reader.close()
-
-                    // Закрытие соединения
-                    connection.disconnect()
-
-                    // Вывод ответа
-                    println(responsd.toString())
 
                     val byteBuf: ByteBuf = Unpooled.copiedBuffer("ok", StandardCharsets.UTF_8)
                     val response = DatagramPacket(byteBuf, packet.sender())
