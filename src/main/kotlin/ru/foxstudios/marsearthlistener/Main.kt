@@ -10,7 +10,7 @@ import java.net.URI
 import java.nio.charset.StandardCharsets
 
 fun main(args: Array<String>) {
-    val server = UdpServer.create().port(25578).host("127.0.0.1").wiretap(true).handle { inbound, outbound ->
+    val server = UdpServer.create().port(25578).host("0.0.0.0").wiretap(true).handle { inbound, outbound ->
         val inFlux: Flux<DatagramPacket> = inbound.receiveObject()
             .handle { incoming, sink ->
                 if (incoming is DatagramPacket) {

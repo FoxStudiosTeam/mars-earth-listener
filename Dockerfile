@@ -3,7 +3,6 @@ LABEL authors="Senko-san"
 LABEL authors="AgniaEndie"
 LABEL authors="GekkStr"
 LABEL autors="xxlegendzxx22"
-WORKDIR /mars-earth-listener
-COPY . /mars-earth-listener
-RUN gradle jar
+WORKDIR /earthbridge
+COPY . /earthbridge
 ENTRYPOINT ["java","-XX:+UseZGC", "-jar", "/mars-earth-listener/build/libs/mars-earth-listener-1.0-SNAPSHOT.jar"]
