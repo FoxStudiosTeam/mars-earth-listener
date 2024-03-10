@@ -5,6 +5,9 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.socket.DatagramPacket
 import reactor.core.publisher.Flux
 import reactor.netty.udp.UdpServer
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -18,16 +21,31 @@ fun main(args: Array<String>) {
                     val content = packet.content().toString(StandardCharsets.UTF_8)
                     println(content.toByteArray().size)
                     val url = URI("http://localhost:30007/data/addschedule").toURL()
-                    val con = url.openConnection() as HttpURLConnection
-                    con.requestMethod = "POST"
-                    con.doOutput = true
-                    con.setRequestProperty("Content-Type", "application/json")
-                    con.setRequestProperty("Accept", "application/json")
-                    con.outputStream.use{
-                        output -> output.write(content.toByteArray(StandardCharsets.UTF_8))
+                    val connection = url.openConnection() as HttpURLConnection
+
+                    connection.requestMethod = "POST"
+                    connection.setRequestProperty("Content-Type", "application/json")
+                    connection.doOutput = true
+
+                    val requestBody = content
+
+                    val outputStream: OutputStream = connection.outputStream
+                    outputStream.write(requestBody.toByteArray())
+                    outputStream.flush()
+
+                    val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                    var line: String?
+                    val responsd = StringBuffer()
+                    while (reader.readLine().also { line = it } != null) {
+                        responsd.append(line)
                     }
-                    println(content)
-                    con.disconnect()
+                    reader.close()
+
+                    // Закрытие соединения
+                    connection.disconnect()
+
+                    // Вывод ответа
+                    println(responsd.toString())
 
                     val byteBuf: ByteBuf = Unpooled.copiedBuffer("ok", StandardCharsets.UTF_8)
                     val response = DatagramPacket(byteBuf, packet.sender())
